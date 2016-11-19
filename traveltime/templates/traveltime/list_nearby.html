@@ -1,0 +1,17 @@
+{% extends "traveltime/base.html" %}
+
+{% block title %} Nearby Towns {% endblock %}
+
+{% block content %}
+
+{% if locations %}
+    <ul>
+    {% for place in locations %}
+        <li>{{place}}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No locations given!.</p>
+{% endif %}
+
+{% endblock %}
