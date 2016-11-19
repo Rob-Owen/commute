@@ -4,16 +4,20 @@ from get_travel_time import get_traveltime
 from .models import LargeTown, DistanceMatrix
 
 def neighbours(center, time):
+
+	# assume 100mph tops
+	max_dist = time / 60 * 100
+
 	# get destination from LargeTowns
 	dest = LargeTown.objects.get(place_name = dest)
 
 	# get all other towns within 100 miles
 	starts = DistanceMatrix.objects().filter(
 					route_starts = dest).filter(
-					linear_distance < 100)
+					linear_distance < max_dist)
 	ends = DistanceMatrix.objects().filter(
 					route_ends = dest).filter(
-					linear_distance < 100)
+					linear_distance < max_dist)
 	
 	query_points = []
 	for town in starts:
@@ -35,7 +39,7 @@ def results(request):
 	time = request.GET.get('time')
 	method = request.GET.get('optionsTransit')
 
-	start_points = neighbours(dest)
+	start_points = neighbours(dest, time)
 
 	return render(request, 'traveltime/nearby_towns.html', {'locations' : start_points})
 
