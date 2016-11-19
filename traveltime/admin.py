@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import UK_locations, Population
+
+admin.site.register(UK_locations)
+admin.site.register(Population)
