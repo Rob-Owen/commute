@@ -9,15 +9,13 @@ def neighbours(center, time):
 	max_dist = time / 60 * 100
 
 	# get destination from LargeTowns
-	dest = LargeTown.objects.get(place_name = dest)
+	dest = LargeTown.objects.get(place_name = center)
 
 	# get all other towns within 100 miles
 	starts = DistanceMatrix.objects().filter(
-					route_starts = dest).filter(
-					linear_distance < max_dist)
+		route_starts=dest, linear_distance__lte=max_dist)
 	ends = DistanceMatrix.objects().filter(
-					route_ends = dest).filter(
-					linear_distance < max_dist)
+		route_ends = dest, linear_distance__lte=max_dist)
 	
 	query_points = []
 	for town in starts:
@@ -36,7 +34,7 @@ def neighbours(center, time):
 
 def results(request):
 	dest = request.GET.get('destination')
-	time = request.GET.get('time')
+	time = int(request.GET.get('time'))
 	method = request.GET.get('optionsTransit')
 
 	start_points = neighbours(dest, time)
@@ -63,4 +61,10 @@ def input(request):
 		if place.admin_name3 is not None:
 			s += ', ' + place.admin_name3
 		start_points.append(s)
-	return render(request, 'traveltime/index.html', {'locations' : start_points})
+
+	s = []
+	for i, s in enumerate(start_points):
+		s.append({ 'text' 	: s,
+					'value' : i	})
+
+	return render(request, 'traveltime/index.html', {'locations' : s})
