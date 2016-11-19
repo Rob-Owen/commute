@@ -1,29 +1,35 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from get_travel_time import get_traveltime
+from .get_travel_time import get_traveltime
 from .models import LargeTown, DistanceMatrix
 
 def neighbours(center, time):
 
 	# assume 100mph tops
-	max_dist = time / 60 * 100
+	max_dist = 100* time / 60
+	print(max_dist)
 
 	# get destination from LargeTowns
 	dest = LargeTown.objects.get(place_name = center)
+	print(dest)
 
+	t1 = DistanceMatrix.objects.filter(start=dest,
+				linear_distance__lte=max_dist).values('end')
+	t2 = DistanceMatrix.objects.filter(end=dest,
+				linear_distance__lte=max_dist).values('start')
 	# get all other towns within 100 miles
-	starts = DistanceMatrix.objects().filter(
-		route_starts=dest, linear_distance__lte=max_dist)
-	ends = DistanceMatrix.objects().filter(
-		route_ends = dest, linear_distance__lte=max_dist)
-	
+
 	query_points = []
-	for town in starts:
+	for v in t1:
+		town = LargeTown.objects.get(place_name=v['end'])
+		print("From %s to %s. %s miles" % (dest, town, DistanceMatrix.objects.get(start=dest,end=town)))
+
 		query_points.append( town.place_name + ', ' +
 							 town.admin_name1 + ', ' +
 							 town.admin_name2 + ', ' +
 							 town.admin_name3 )
-	for town in ends:
+	for v in t2:
+		town = LargeTown.objects.get(place_name=v['start'])
 		query_points.append( town.place_name + ', ' +
 							 town.admin_name1 + ', ' +
 							 town.admin_name2 + ', ' +
@@ -37,17 +43,23 @@ def results(request):
 	time = int(request.GET.get('time'))
 	method = request.GET.get('optionsTransit')
 
-	start_points = neighbours(dest, time)
+	start_points = list(set(neighbours(dest, time)))
 
-	return render(request, 'traveltime/nearby_towns.html', {'locations' : start_points})
 
-#	while len(start_points) > 25:
-#		pts = start_points[0:25]
-#		start_points = start_points[25:]
-#		get_traveltime(start_points, dest, method):
-#	if len(start_points) > 0:
-#		get_traveltime(start_points, dest, method):
+	dists = dict()
+	while len(start_points) > 25:
+		pts = start_points[0:25]
+		start_points = start_points[25:]
+		a = get_traveltime(pts, dest, method)
+		dists = dict(**dists, **a)
 
+	if len(start_points) > 0:
+		a = get_traveltime(start_points, dest, method)
+		dists = dict(**dists, **a)
+
+	filtered = {k:v for k, v in dists.items() if v < time*60}
+	names = list(filtered.keys())
+	return render(request, 'traveltime/list_nearby.html', {'locations' : names})
 
 def input(request):
 	places = LargeTown.objects.all()

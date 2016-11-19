@@ -50,4 +50,4 @@ class DistanceMatrix(models.Model):
 								null=True )
 	
 	def __str__(self):
-		return "%s --> %s: %s miles" % (self.place1, self.place2, self.linear_distance)
+		return "%s --> %s: %s miles" % (self.start, self.end, self.linear_distance)

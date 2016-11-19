@@ -1,5 +1,6 @@
 import googlemaps
 from datetime import datetime
+from .api_key import key
 
 # Test: Variables to be received from database
 origin = ["Fakenham", "Staplehurst"]
@@ -18,12 +19,8 @@ def get_traveltime(origin, dest, method):
 	values of travel time in seconds.
 	"""
 
-	# Get API key
-	with open ("api-key", "r") as myfile:
-		api_key = myfile.readlines()
-
 	# Create gmaps client
-	gmaps = googlemaps.Client(key=api_key[0])
+	gmaps = googlemaps.Client(key=key)
 
 	# Force time to Monday 8am TODO: Lazy and time specific
 	dt = datetime(2016, 11, 21, 8, 0, 0)
