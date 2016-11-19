@@ -17,10 +17,9 @@ for p1 in LargeTown.objects.all():
 		origin = (float(p1.latitude), float(p1.longitude))
 		dest = (float(p2.latitude), float(p2.longitude))
 		dist = vincenty(origin, dest).miles
-		n = DistanceMatrix( linear_distance=dist )
+		n = DistanceMatrix( 
+			start=p1,
+			end=p2,
+			linear_distance=dist )
 		n.save()
-		p1.route_starts = n
-		p2.route_ends = n
-		p1.save()
-		p2.save()
 		done.append({p1.place_name, p2.place_name})

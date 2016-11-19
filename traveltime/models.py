@@ -33,7 +33,9 @@ class Population(models.Model):
 
 class DistanceMatrix(models.Model):
 	linear_distance = models.IntegerField()
-
+	start = models.ForeignKey( 'LargeTown', on_delete=models.CASCADE, related_name='route_start' )
+	end = models.ForeignKey( 'LargeTown', on_delete=models.CASCADE, related_name='route_end' )
+	
 	def __str__(self):
 		return "%s --> %s: %s miles" % (self.place1, self.place2, self.linear_distance)
 
@@ -45,11 +47,6 @@ class LargeTown(models.Model):
 	latitude = models.FloatField()
 	longitude = models.FloatField()
 	pop = models.IntegerField()
-
-	route_starts = models.ForeignKey( 'DistanceMatrix', on_delete=models.SET_NULL,
-									   related_name='place1', null=True)
-	route_ends = models.ForeignKey( 'DistanceMatrix', on_delete=models.SET_NULL,
-									   related_name='place2', null=True)
 
 	def __str__(self):
 		return "%s (%s)" % (self.place_name, self.pop)
