@@ -53,10 +53,10 @@ def input(request):
 	for place in places:
 		s = place.place_name
 		if place.admin_name1 is not None:
-			s += ', ' + self.admin_name1
+			s += ', ' + place.admin_name1
 		if place.admin_name2 is not None:
-			s += ', ' + self.admin_name2
+			s += ', ' + place.admin_name2
 		if place.admin_name3 is not None:
-			s += ', ' + self.admin_name3
+			s += ', ' + place.admin_name3
 		start_points.append(s)
 	return render(request, 'traveltime/index.html', {'locations' : start_points})

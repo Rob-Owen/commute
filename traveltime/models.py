@@ -31,7 +31,7 @@ class Population(models.Model):
 		return "%s: %i" % (self.place_name, self.pop)
 
 
-class DistanceMatrix+(models.Model):
+class DistanceMatrix(models.Model):
 	linear_distance = models.IntegerField()
 
 	def __str__(self):
