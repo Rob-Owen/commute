@@ -2,21 +2,25 @@
 
 {% block title %} Commute {% endblock %}
 
+{% block extra_head %}
+
+{% endblock %}
+
 {% block content %}
 
 <div class="jumbotron">
-  <h1 class="display-3">Want to commute?</h1>
+  <h1 class="display-3">Want to Commute?</h1>
 </div>
 
 <form action="{% url 'search' %}" method="get">
   <div class="form-group">
     <label for="destination">Destination</label>
-    <input type="string" class="form-control" id="destination" placeholder="Destination">
+    <input type="text" name="destination" class="form-control" id="destination" placeholder="Destination">
   </div>
 
-    <div class="form-group">
+  <div class="form-group">
     <label for="time">Time</label>
-    <input type="float" class="form-control" id="time" placeholder="Time">
+    <input type="text" name="time" class="form-control" id="time" placeholder="Time">
   </div>
 
 <div class="radio">
