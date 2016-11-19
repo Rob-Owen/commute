@@ -54,17 +54,6 @@ def input(request):
 	start_points = []
 	for place in places:
 		s = place.place_name
-		if place.admin_name1 is not None:
-			s += ', ' + place.admin_name1
-		if place.admin_name2 is not None:
-			s += ', ' + place.admin_name2
-		if place.admin_name3 is not None:
-			s += ', ' + place.admin_name3
 		start_points.append(s)
 
-	s = []
-	for i, s in enumerate(start_points):
-		s.append({ 'text' 	: s,
-					'value' : i	})
-
-	return render(request, 'traveltime/index.html', {'locations' : s})
+	return render(request, 'traveltime/index.html', {'locations' : start_points})

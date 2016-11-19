@@ -13,17 +13,14 @@
       <title>{% block title %}{% endblock %}</title>
       
       <!-- jQuery -->
-      <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+      <script type="text/javascript" src="{% static "jquery-3.1.1.min.js" %}"></script>
       
       {# Load Bootstrap 3 CSS and JavaScript #}
       {% bootstrap_css %}
       {% bootstrap_javascript %}
       
-      <!-- Selectize -->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/js/selectize.js"></script>
-
-      <!-- Selectize Styles -->
-      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/css/selectize.bootstrap3.css" />
+      <!-- Typeahead -->
+      <script type="text/javascript" src="{% static "bootstrap-typeahead.js" %}"></script>
       
       <!-- My Custom Styles -->
       <link rel="stylesheet" type="text/css" href="{% static "style.css" %}" />
