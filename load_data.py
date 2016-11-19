@@ -1,9 +1,9 @@
 
 
 # Full path and name to your csv file
-csv_filepathname="/Users/rebeccamorgan/Drive/Development/commute/GB.txt"
+csv_filepathname="GB.txt"
 # Full path to your django project directory
-your_djangoproject_home="/Users/rebeccamorgan/Drive/Development/commute/commute"
+your_djangoproject_home="./commute"
 
 import sys,os
 sys.path.append(your_djangoproject_home)

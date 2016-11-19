@@ -4,7 +4,7 @@ from django.db import models
 class uk_location(models.Model):
 	country_code = models.CharField(max_length=2)
 	postal_code = models.CharField(max_length=20)
-	place_name = models.CharField(max_length=180, db_index=True)
+	place_name = models.CharField(max_length=180, primary_key=True)
 	admin_name1 = models.CharField(max_length=100, null=True)
 	admin_code1 = models.CharField(max_length=20, null=True)
 	admin_name2 = models.CharField(max_length=100, null=True)
@@ -21,7 +21,11 @@ class uk_location(models.Model):
 # UK town populations ()
 class Population(models.Model):
 	place_name = models.CharField(max_length=180, db_index=True)
+	region_name = models.CharField(max_length=100, null=True) # e.g. city
 	pop = models.IntegerField()
+
+	location = models.ForeignKey( 'uk_location', on_delete = models.SET_NULL,
+								  related_name = 'pop_entry', null=True)
 
 	def __str__(self):
 		return "%s: %i" % (self.place_name, self.pop)
