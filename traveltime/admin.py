@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import UK_locations, Population
+from .models import uk_location, Population
 
-admin.site.register(UK_locations)
+admin.site.register(uk_location)
 admin.site.register(Population)
