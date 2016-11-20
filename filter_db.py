@@ -21,7 +21,7 @@ for town in Population.objects.all():
 			admin_name2 = loc.admin_name2,
 			admin_name3 = loc.admin_name3,
 			latitude = loc.latitude,
-			longitude = loc.latitude,
+			longitude = loc.longitude,
 			pop = town.pop
 		)
 	nt.save()
