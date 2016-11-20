@@ -105,6 +105,8 @@ def results(request):
 		print("%s: %d seconds" % (s, times[i]))
 
 	names = [n for i,n in enumerate(names) if times[i] < 60*time]
+	start_lats = [n for i,n in enumerate(start_lats) if times[i] < 60*time]
+	start_longs = [n for i,n in enumerate(start_longs) if times[i] < 60*time]
 	times = [t for t in times if t < 60*time]
 
 	print("%d locations returned." % len(names))
