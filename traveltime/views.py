@@ -5,6 +5,11 @@ from .models import LargeTown, DistanceMatrix
 
 def neighbours(center, time):
 
+	def add_if(string, appendee):
+		if len(appendee) > 0:
+			string += ', ' + appendee
+		return string
+
 	# assume 100mph tops
 	max_dist = 100* time / 60
 	print(max_dist)
@@ -23,17 +28,18 @@ def neighbours(center, time):
 	for v in t1:
 		town = LargeTown.objects.get(place_name=v['end'])
 		print("From %s to %s. %s miles" % (dest, town, DistanceMatrix.objects.get(start=dest,end=town)))
-
-		query_points.append( town.place_name + ', ' +
-							 town.admin_name1 + ', ' +
-							 town.admin_name2 + ', ' +
-							 town.admin_name3 )
+		s = town.place_name
+		s = add_if(s, town.admin_name1)
+		s = add_if(s, town.admin_name2)
+		s = add_if(s, town.admin_name3)
+		query_points.append( s )
 	for v in t2:
 		town = LargeTown.objects.get(place_name=v['start'])
-		query_points.append( town.place_name + ', ' +
-							 town.admin_name1 + ', ' +
-							 town.admin_name2 + ', ' +
-							 town.admin_name3 )
+		s = town.place_name
+		s = add_if(s, town.admin_name1)
+		s = add_if(s, town.admin_name2)
+		s = add_if(s, town.admin_name3)
+		query_points.append( s )
 
 	return query_points
 
@@ -46,19 +52,23 @@ def results(request):
 	start_points = list(set(neighbours(dest, time)))
 
 
-	dists = dict()
-	while len(start_points) > 25:
-		pts = start_points[0:25]
-		start_points = start_points[25:]
-		a = get_traveltime(pts, dest, method)
-		dists = dict(**dists, **a)
+	names = start_points
 
-	if len(start_points) > 0:
-		a = get_traveltime(start_points, dest, method)
-		dists = dict(**dists, **a)
+	# dists = dict()
+	# while len(start_points) > 25:
+	# 	pts = start_points[0:25]
+	# 	start_points = start_points[25:]
+	# 	a = get_traveltime(pts, dest, method)
+	# 	dists = dict(**dists, **a)
 
-	filtered = {k:v for k, v in dists.items() if v < time*60}
-	names = list(filtered.keys())
+	# if len(start_points) > 0:
+	# 	a = get_traveltime(start_points, dest, method)
+	# 	dists = dict(**dists, **a)
+
+	# filtered = {k:v for k, v in dists.items() if v < time*60}
+	# names = list(filtered.keys())
+	
+	print("%d locations returned." % len(names))
 	return render(request, 'traveltime/list_nearby.html', {'locations' : names})
 
 def input(request):

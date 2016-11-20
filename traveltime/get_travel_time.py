@@ -28,12 +28,14 @@ def get_traveltime(origin, dest, method):
 
 	# Request travel time
 	distance_result = gmaps.distance_matrix(origin, dest, mode=method, units="imperial", departure_time=seconds)
-
 	# Store in dictionary
 	distance_dict = dict()
 
-	for i in range(len(origin)):
+	for i, start in enumerate(origin):
 		# Extract time in seconds and store in dict with relevant origin name
-		distance_dict[origin[i]] = distance_result["rows"][i]["elements"][0]["duration"]["value"]
+		try:
+			distance_dict[start] = distance_result["rows"][i]["elements"][0]["duration"]["value"]
+		except:
+			print("Failed to find distance from %s to %s" % (start, dest))
 
 	return distance_dict
