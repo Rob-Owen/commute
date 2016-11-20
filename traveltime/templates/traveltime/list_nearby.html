@@ -6,66 +6,77 @@
 
 {% block extra_head %}
 
-    <!-- Esri API -->
-    <link rel="stylesheet" href="https://js.arcgis.com/3.18/esri/css/esri.css">
-    <script src="https://js.arcgis.com/3.18/"></script>
+	<!-- Esri API -->
+	<link rel="stylesheet" href="https://js.arcgis.com/3.18/esri/css/esri.css">
+	<script src="https://js.arcgis.com/3.18/"></script>
 
+	<!-- Build location list for origin markers -->
+	<script type="text/javascript">
+	var locations = [];
 
-    <!-- Initialise Map -->
+	for (var i = 0; i < {{ locations|safe }}.length; i++) {
+		locations.push({
+			latitude: {{ start_lats|safe }}[i],
+			longitude: {{ start_longs|safe }}[i]
+		});
+	}
+	</script>
+
+	<!-- Map -->
 	<script>
-      var map;
+	var map;
 
-      require(["esri/map", "esri/graphic","esri/symbols/PictureMarkerSymbol","esri/geometry/Point","esri/symbols/TextSymbol",
-      			"dojo/domReady!"], function(Map) {
-        map = new Map("map", {
-          basemap: "national-geographic",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
-          center: [{{end_long}}, {{ end_lat }}], // longitude, latitude
-          zoom: 13
-        });
-      });
-    
-    console.log({{end_long}}, {{ end_lat }})
+	require(["esri/map", 
+		"esri/graphic",
+		"esri/symbols/PictureMarkerSymbol",
+		"esri/geometry/Point", 
+		"dojo/on",
+		"dojo/domReady!"], function(Map, Graphic, PictureMarkerSymbol, Point, on) {
+		map = new Map("map", {
+		  basemap: "streets",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
+		  center: [{{end_long}}, {{ end_lat }}], // longitude, latitude
+		  zoom: 10,
+		});
 
-    //// adding in the markers
-        var locations = [{
-            latitude: 37.75,
-            longitude: -123.45,
-            text: 34
-        }, {
-            latitude: 37.75,
-            longitude: -120.45,
-            text: 50
-        }];
-        var picSymbol = new PictureMarkerSymbol(
-                'http://static.arcgis.com/images/Symbols/Shapes/BluePin1LargeB.png', 60, 60);
+		// Once loaded, add markers
+		map.on('load', function() {
 
-            for (var i = 0; i < locations.length; i++) {
-                var geometryPoint = new Point(locations[i].longitude, locations[i].latitude);
-                var textSymbol = new TextSymbol(locations[i].text).setOffset(0, -4);
-                map.graphics.add(new Graphic(geometryPoint, picSymbol));
-                map.graphics.add(new Graphic(geometryPoint, textSymbol));
-            }
-        //// end marker codes
+			// Add origin markers
+			var picSymbol = new PictureMarkerSymbol('{% static "marker.svg"%}', 30, 30);
 
-     </script>
+				for (var i = 0; i < locations.length; i++) {
+					var geometryPoint = new Point(locations[i].longitude, locations[i].latitude);
+					map.graphics.add(new Graphic(geometryPoint, picSymbol));
+				}
+
+			// Add destination marker
+			var picDestSymbol = new PictureMarkerSymbol('{% static "work_icon.svg"%}', 30, 30);
+			var geometryPoint = new Point({{end_long}}, {{ end_lat }});
+			map.graphics.add(new Graphic(geometryPoint, picDestSymbol));
+
+		});
+	});
+
+
+	 </script>
 
 {% endblock %}
 
 {% block content %}
 
-    <div class="container" style="padding:15px;">
-          <div id="map"></div>
-    </div>
+	<div class="container" style="padding:15px;">
+		  <div id="map"></div>
+	</div>
 
 
 {% if locations %}
-    <ul>
-    {% for place in locations %}
-        <li>{{place}}</li>
-    {% endfor %}
-    </ul>
+	<ul>
+	{% for place in locations %}
+		<li>{{place}}</li>
+	{% endfor %}
+	</ul>
 {% else %}
-    <p>No locations given!.</p>
+	<p>No locations given!.</p>
 {% endif %}
 
 {% endblock %}
