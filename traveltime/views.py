@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .get_travel_time import get_traveltime
-from .models import LargeTown, DistanceMatrix
+from .models import LargeTown, DistanceMatrix, CachedDistanceQuery
+import pprint
 
 def neighbours(center, time):
 
@@ -12,12 +13,8 @@ def neighbours(center, time):
 
 	# assume 100mph tops
 	max_dist = 100* time / 60
-	print(max_dist)
-
 	# get destination from LargeTowns
 	dest = LargeTown.objects.get(place_name = center)
-	print(dest)
-
 	t1 = DistanceMatrix.objects.filter(start=dest,
 				linear_distance__lte=max_dist).values('end')
 	t2 = DistanceMatrix.objects.filter(end=dest,
@@ -27,21 +24,20 @@ def neighbours(center, time):
 	query_points = []
 	for v in t1:
 		town = LargeTown.objects.get(place_name=v['end'])
-		print("From %s to %s. %s miles" % (dest, town, DistanceMatrix.objects.get(start=dest,end=town)))
 		s = town.place_name
-		s = add_if(s, town.admin_name1)
-		s = add_if(s, town.admin_name2)
 		s = add_if(s, town.admin_name3)
+		s = add_if(s, town.admin_name2)
+		s = add_if(s, town.admin_name1)
 		query_points.append( s )
 	for v in t2:
 		town = LargeTown.objects.get(place_name=v['start'])
 		s = town.place_name
-		s = add_if(s, town.admin_name1)
-		s = add_if(s, town.admin_name2)
 		s = add_if(s, town.admin_name3)
+		s = add_if(s, town.admin_name2)
+		s = add_if(s, town.admin_name1)
 		query_points.append( s )
 
-	return query_points
+	return set(query_points), dest.longitude, dest.latitude
 
 
 def results(request):
@@ -49,27 +45,64 @@ def results(request):
 	time = int(request.GET.get('time'))
 	method = request.GET.get('optionsTransit')
 
-	start_points = list(set(neighbours(dest, time)))
+	n_details = neighbours(dest, time)
 
+	start_points = list(n_details[0])
+	query_points = []
+	names = []
+	times = []
+	c = 0
+	q = 0
 
-	names = start_points
+	# check for cached results first
+	cached = CachedDistanceQuery.objects.all()
+	for place in start_points:
+		tmp = cached.filter(start=place,end=dest)
+		if len(tmp) == 1:
+			names.append(place) 
+			times.append(tmp[0].time)
+			c += 1
+		else:
+			query_points.append(place)
+			q += 1
 
-	# dists = dict()
-	# while len(start_points) > 25:
-	# 	pts = start_points[0:25]
-	# 	start_points = start_points[25:]
-	# 	a = get_traveltime(pts, dest, method)
-	# 	dists = dict(**dists, **a)
+	# google query for remaining places
+	while len(query_points) > 25:
+		pts = query_points[0:25]
+		query_points = query_points[25:]
+		a = get_traveltime(pts, dest, method)
+		for k, v in a.items():
+			names.append(k)
+			times.append(v)
+			s = CachedDistanceQuery(
+					start=k,
+					end=dest,
+					time=v)
+			s.save()
 
-	# if len(start_points) > 0:
-	# 	a = get_traveltime(start_points, dest, method)
-	# 	dists = dict(**dists, **a)
+	if len(query_points) > 0:
+		a = get_traveltime(query_points, dest, method)
+		for k, v in a.items():
+			names.append(k)
+			times.append(v)
+			s = CachedDistanceQuery(
+					start=k,
+					end=dest,
+					time=v)
+			s.save()
 
-	# filtered = {k:v for k, v in dists.items() if v < time*60}
-	# names = list(filtered.keys())
-	
+	for i, s in enumerate(names):
+		print("%s: %d seconds" % (s, times[i]))
+
+	names = [n for i,n in enumerate(names) if times[i] < 60*time]
+	times = [t for t in times if t < 60*time]
+
 	print("%d locations returned." % len(names))
-	return render(request, 'traveltime/list_nearby.html', {'locations' : names})
+	print("%d queries, %d cached" % (q, c))
+	return render(request, 'traveltime/list_nearby.html', {'locations' : names,
+														   'travel_times' : times,
+														   'end_lat' : n_details[2],
+														   'end_long' : n_details[1]})
 
 def input(request):
 	places = LargeTown.objects.all()

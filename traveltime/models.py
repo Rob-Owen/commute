@@ -51,3 +51,8 @@ class DistanceMatrix(models.Model):
 	
 	def __str__(self):
 		return "%s --> %s: %s miles" % (self.start, self.end, self.linear_distance)
+
+class CachedDistanceQuery(models.Model):
+	start = models.CharField( max_length=255 )
+	end = models.CharField( max_length=255 )
+	time = models.IntegerField() # time in seconds
