@@ -24,6 +24,7 @@ def neighbours(center, time):
 	query_points = []
 	start_longs = []
 	start_lats = []
+	locs = {}
 	for v in t1:
 		town = LargeTown.objects.get(place_name=v['end'])
 		s = town.place_name
@@ -31,21 +32,9 @@ def neighbours(center, time):
 		s = add_if(s, town.admin_name2)
 		s = add_if(s, town.admin_name1)
 		query_points.append(s )
-		start_longs.append( town.longitude )
-		start_lats.append( town.latitude )
+		locs[s] = (town.longitude, town.latitude)
 
-
-	# for v in t2:
-	# 	town = LargeTown.objects.get(place_name=v['start'])
-	# 	s = town.place_name
-	# 	s = add_if(s, town.admin_name3)
-	# 	s = add_if(s, town.admin_name2)
-	# 	s = add_if(s, town.admin_name1)
-	# 	query_points.append( s )
-	# 	start_longs.append( town.longitude )
-	# 	start_lats.append( town.latitude )
-
-	return query_points, start_longs, start_lats, dest.longitude, dest.latitude
+	return query_points, locs, dest.longitude, dest.latitude
 
 
 def results(request):
@@ -56,8 +45,7 @@ def results(request):
 	n_details = neighbours(dest, time)
 
 	start_points = n_details[0]
-	start_longs = n_details[1]
-	start_lats = n_details[2]
+	locs = n_details[1]
 	query_points = []
 	names = []
 	times = []
@@ -105,9 +93,10 @@ def results(request):
 		print("%s: %d seconds" % (s, times[i]))
 
 	names = [n for i,n in enumerate(names) if times[i] < 60*time]
-	start_lats = [n for i,n in enumerate(start_lats) if times[i] < 60*time]
-	start_longs = [n for i,n in enumerate(start_longs) if times[i] < 60*time]
 	times = [t for t in times if t < 60*time]
+
+	start_longs = [locs[n][0] for n in names]
+	start_lats = [locs[n][1] for n in names]
 
 	print("%d locations returned." % len(names))
 	print("%d queries, %d cached" % (q, c))
@@ -115,8 +104,8 @@ def results(request):
 														   'travel_times' : times,
 														   'start_longs' : start_longs,
 														   'start_lats' : start_lats,
-														   'end_lat' : n_details[4],
-														   'end_long' : n_details[3]})
+														   'end_lat' : n_details[3],
+														   'end_long' : n_details[2]})
 
 def input(request):
 	places = LargeTown.objects.all()
