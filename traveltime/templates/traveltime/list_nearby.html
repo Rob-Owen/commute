@@ -22,9 +22,13 @@
 	for (var i = 0; i < {{ locations|safe }}.length; i++) {
 		locations.push({
 			latitude: {{ start_lats|safe }}[i],
-			longitude: {{ start_longs|safe }}[i]
+			longitude: {{ start_longs|safe }}[i],
+      name: {{ locations|safe }}[i],
+      time: {{ travel_times|safe }}[i] / 60,
 		});
 	}
+
+
 	</script>
 
 	<!-- Map -->
@@ -36,9 +40,10 @@
 		"esri/graphic",
 		"esri/symbols/PictureMarkerSymbol",
 		"esri/geometry/Point", 
+    "esri/InfoTemplate",
 		"dojo/on",
     "dojo/dom",
-		"dojo/domReady!"], function(Map, GeoJsonLayer, Graphic, PictureMarkerSymbol, Point, on) {
+		"dojo/domReady!"], function(Map, GeoJsonLayer, Graphic, PictureMarkerSymbol, Point, InfoTemplate, on) {
 		map = new Map("map", {
 		  basemap: "streets",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
 		  center: [{{end_long}}, {{ end_lat }}], // longitude, latitude
@@ -58,8 +63,10 @@
 			var picSymbol = new PictureMarkerSymbol('{% static "marker.svg"%}', 30, 30);
 
 				for (var i = 0; i < locations.length; i++) {
+
+          var Attrs = {name : locations[i].name, time : locations[i].time }
 					var geometryPoint = new Point(locations[i].longitude, locations[i].latitude);
-					map.graphics.add(new Graphic(geometryPoint, picSymbol));
+					map.graphics.add(new Graphic(geometryPoint, picSymbol, Attrs, new InfoTemplate("${name}", "Travel Time: ${time} minutes")));
 				}
 
 			// Add destination marker
