@@ -20,7 +20,7 @@ To run:
 python manage.py runserver
 ```
 
-The commited database has all of the necessary information, but if you want/need to rebuild the databse:
+The committed database has all of the necessary information, but if you want/need to rebuild the database:
 
 1. Run the python script `build_database.py`.
 
