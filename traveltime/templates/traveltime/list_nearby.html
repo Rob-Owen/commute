@@ -10,6 +10,11 @@
 	<link rel="stylesheet" href="https://js.arcgis.com/3.18/esri/css/esri.css">
 	<script src="https://js.arcgis.com/3.18/"></script>
 
+
+
+  <script src='{% static "geojson-layer-js-master/vendor/terraformer/terraformer.min.js" %}'></script>
+  <script src='{% static "geojson-layer-js-master/vendor/terraformer-arcgis-parser/terraformer-arcgis-parser.min.js" %}'></script>
+
 	<!-- Build location list for origin markers -->
 	<script type="text/javascript">
 	var locations = [];
@@ -27,11 +32,13 @@
 	var map;
 
 	require(["esri/map", 
+    '{% static "geojson-layer-js-master/src/geojsonlayer.js" %}',
 		"esri/graphic",
 		"esri/symbols/PictureMarkerSymbol",
 		"esri/geometry/Point", 
 		"dojo/on",
-		"dojo/domReady!"], function(Map, Graphic, PictureMarkerSymbol, Point, on) {
+    "dojo/dom",
+		"dojo/domReady!"], function(Map, GeoJsonLayer, Graphic, PictureMarkerSymbol, Point, on) {
 		map = new Map("map", {
 		  basemap: "streets",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
 		  center: [{{end_long}}, {{ end_lat }}], // longitude, latitude
@@ -41,6 +48,12 @@
 		// Once loaded, add markers
 		map.on('load', function() {
 
+      // add supermarkets to map
+      var geoJsonLayer = new GeoJsonLayer({
+      url: "https://opendata.arcgis.com/datasets/44a257576088440faaa22d49676cbf14_0.geojson"
+      });
+      map.addLayer(geoJsonLayer);
+      // geoJsonLayer.show();
 			// Add origin markers
 			var picSymbol = new PictureMarkerSymbol('{% static "marker.svg"%}', 30, 30);
 
@@ -53,6 +66,8 @@
 			var picDestSymbol = new PictureMarkerSymbol('{% static "work_icon.svg"%}', 30, 30);
 			var geometryPoint = new Point({{end_long}}, {{ end_lat }});
 			map.graphics.add(new Graphic(geometryPoint, picDestSymbol));
+
+
 
 		});
 	});
