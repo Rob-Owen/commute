@@ -1,10 +1,10 @@
 # Commute
 
-A web app for calculating potential places to live based on your work location, method of transport and maximum travel time. Alongside these results, visualises demographic data from the Esri OpenData service.
+A web app for calculating potential places to live based on your work location, method of transport and maximum travel time. Alongside these results, visualises demographic data from the Esri OpenData service. Location lat/lon sourced from [GeoNames](http://www.geonames.org/).
 
 Built at [OxfordHack 2016](https://devpost.com/software/commute).
 
-## Usage
+## Installation and Usage
 
 Using Python 3, install `requirements.txt` using pip:
 
@@ -22,7 +22,7 @@ python manage.py runserver
 
 If you want/need to rebuild the databse:
 
-1. Run the python script build_database.py
+1. Run the python script `build_database.py` in the `db-build` directory.
 
 2. Run the following commands:
 
@@ -31,7 +31,7 @@ python manage.py makemigrations
 python manage.py migrate 
 ```
 
-3. You can add a superuser to view the database at /admin:
+3. You can now add a superuser to view the database at /admin:
 
 ```
 python manage.py createsuperuser
