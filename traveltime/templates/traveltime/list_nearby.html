@@ -10,10 +10,12 @@
 	<link rel="stylesheet" href="https://js.arcgis.com/3.18/esri/css/esri.css">
 	<script src="https://js.arcgis.com/3.18/"></script>
 
+	<!-- Esri Boostrap -->
+	<!-- <link rel="stylesheet" href="//esri.github.io/bootstrap-map-js/src/css/bootstrapmap.css"> -->
 
-
-  <script src='{% static "geojson-layer-js-master/vendor/terraformer/terraformer.min.js" %}'></script>
-  <script src='{% static "geojson-layer-js-master/vendor/terraformer-arcgis-parser/terraformer-arcgis-parser.min.js" %}'></script>
+	<!-- Add layer importing -->
+	<script src='{% static "geojson-layer-js-master/vendor/terraformer/terraformer.min.js" %}'></script>
+	<script src='{% static "geojson-layer-js-master/vendor/terraformer-arcgis-parser/terraformer-arcgis-parser.min.js" %}'></script>
 
 	<!-- Build location list for origin markers -->
 	<script type="text/javascript">
@@ -40,10 +42,11 @@
 		"esri/graphic",
 		"esri/symbols/PictureMarkerSymbol",
 		"esri/geometry/Point", 
-    "esri/InfoTemplate",
+    	"esri/InfoTemplate",
 		"dojo/on",
-    "dojo/dom",
-		"dojo/domReady!"], function(Map, GeoJsonLayer, Graphic, PictureMarkerSymbol, Point, InfoTemplate, on) {
+		"dojo/query",
+    	"dojo/dom",
+		"dojo/domReady!"], function(Map, GeoJsonLayer, Graphic, PictureMarkerSymbol, Point, InfoTemplate, on, query, dom) {
 		map = new Map("map", {
 		  basemap: "streets",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
 		  center: [{{end_long}}, {{ end_lat }}], // longitude, latitude
@@ -53,18 +56,12 @@
 		// Once loaded, add markers
 		map.on('load', function() {
 
-      // add supermarkets to map
-      var geoJsonLayer = new GeoJsonLayer({
-      url: "https://opendata.arcgis.com/datasets/44a257576088440faaa22d49676cbf14_0.geojson"
-      });
-      map.addLayer(geoJsonLayer);
-      // geoJsonLayer.show();
 			// Add origin markers
 			var picSymbol = new PictureMarkerSymbol('{% static "marker.svg"%}', 30, 30);
 
 				for (var i = 0; i < locations.length; i++) {
 
-          var Attrs = {name : locations[i].name, time : locations[i].time }
+			var Attrs = {name : locations[i].name, time : locations[i].time }
 					var geometryPoint = new Point(locations[i].longitude, locations[i].latitude);
 					map.graphics.add(new Graphic(geometryPoint, picSymbol, Attrs, new InfoTemplate("${name}", "Travel Time: ${time} minutes")));
 				}
@@ -74,10 +71,57 @@
 			var geometryPoint = new Point({{end_long}}, {{ end_lat }});
 			map.graphics.add(new Graphic(geometryPoint, picDestSymbol));
 
+		});
 
+		function selectGeoJsonData(e) {
+            var url;
+            // Get the user input
+            if (e.target.nodeName === "SELECT") {
+                url = dom.byId("geoJsonUrl").value = e.target.options[e.target.selectedIndex].value;
+            } else {
+                url = dom.byId("geoJsonUrl").value;
+            }
+            // Add the layer
+            addGeoJsonLayer(url);
+        }
+
+        function addGeoJsonLayer(url) {
+            // Create the layer
+            var geoJsonLayer = new GeoJsonLayer({
+                url: url // ./data/dc-schools.json
+            });
+            // Add to map
+            map.addLayer(geoJsonLayer);
+
+        }
+
+        function removeAllLayers() {
+            var i, lyr, ids = map.graphicsLayerIds;
+            for (i = ids.length -1; i > -1; i--) {
+                lyr = map.getLayer(ids[i]);
+                map.removeLayer(lyr);
+            }
+            map.infoWindow.hide();
+        }
+
+        // Wire UI events
+        on(dom.byId("selGeoJson"), "change", selectGeoJsonData);
+        on(dom.byId("btnAdd"), "click", selectGeoJsonData);
+        on(dom.byId("btnRemove"), "click", removeAllLayers);
+
+        // Toggle panel
+        on(query(".panel-heading")[0], "click", function () {
+            if (query(".glyphicon.glyphicon-chevron-up")[0]) {
+                query(".glyphicon").replaceClass("glyphicon-chevron-down", "glyphicon-chevron-up");
+                query(".panel-body.collapse").removeClass("in");
+            } else {
+                query(".glyphicon").replaceClass("glyphicon-chevron-up", "glyphicon-chevron-down");
+                query(".panel-body.collapse").addClass("in");
+            }
 
 		});
-	});
+
+    });
 
 
 	 </script>
@@ -86,19 +130,41 @@
 
 {% block content %}
 
-	<div class="container" style="padding:15px;">
-		  <div id="map"></div>
+<div class ="row">
+	<div class ="col-md-4" style="padding:15px;">
+		<div class="panel panel-primary panel-fixed">
+			<div class="panel-heading">
+				<h3 class="panel-title">Load Datasets from ArcGIS OpenData</h3>
+			</div>
+			<div class="panel-body collapse in">
+				<div class="form text-left">
+					<div class="form-group">
+						<label class="control-label">Demographic Data</label>
+						<select class="form-control" id="selGeoJson">
+							<option value='{% static "data/supermarkets.geojson" %}'>UK Supermarkets</option>
+							<option value='{% static "data/working.geojson" %}'>Working Status</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label class="control-label">Your Data <a target="_blank" href="https://developers.arcgis.com/javascript/jshelp/ags_proxy.html">(URL/File/CORS Server)</a></label>
+						<div class="input-group">
+							<input type="text" class="form-control" id="geoJsonUrl" value='{% static "data/supermarkets.geojson" %}' placeholder='{% static "data/supermarkets.geojson" %}'>
+							<span class="input-group-btn">
+								<button id="btnAdd" class="btn btn-success" type="button">Load</button>
+							</span>
+						</div>
+					</div>
+					<div class="form-group text-center">
+						<button id="btnRemove" class="btn btn-default btn-block">Clear All</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
+	<div class="container col-md-8" style="padding:15px;">
+		<div id="map"></div>
+	</div>
+</div>
 
-
-{% if locations %}
-	<ul>
-	{% for place in locations %}
-		<li>{{place}}</li>
-	{% endfor %}
-	</ul>
-{% else %}
-	<p>No locations given!.</p>
-{% endif %}
 
 {% endblock %}
