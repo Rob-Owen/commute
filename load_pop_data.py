@@ -1,46 +1,48 @@
+def load_pop_data():
+	# Full path and name to your csv file
+	csv_filepathname="pop.csv"
+	# Full path to your django project directory
+	your_djangoproject_home="./commute"
 
+	import sys,os
+	sys.path.append(your_djangoproject_home)
+	os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
-# Full path and name to your csv file
-csv_filepathname="pop.csv"
-# Full path to your django project directory
-your_djangoproject_home="./commute"
+	import django
+	django.setup()
 
-import sys,os
-sys.path.append(your_djangoproject_home)
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+	from traveltime.models import Population
 
-import django
-django.setup()
+	import csv
+	dataReader = csv.reader(open(csv_filepathname))
 
-from traveltime.models import Population
+	for row in dataReader:
+		table = Population()
 
-import csv
-dataReader = csv.reader(open(csv_filepathname))
+		s = row[0]
+		table.pop = row[1]
 
-for row in dataReader:
-	table = Population()
+		words = s.split(' ')
+		place = ' '.join(words[:-1]).strip()
+		code = words[-1].strip()
 
-	s = row[0]
-	table.pop = row[1]
+		if code == 'BUA':
+			table.place_name = place
 
-	words = s.split(' ')
-	place = ' '.join(words[:-1]).strip()
-	code = words[-1].strip()
+		elif code == 'BUASD':
+			a = place.split(' - ')
+			authority = a[0].strip()
+			location = a[1].strip()
 
-	if code == 'BUA':
-		table.place_name = place
+			table.place_name = location
+			table.region_name = authority
+		else:
+			print("Unrecognised code: %s" % code)
 
-	elif code == 'BUASD':
-		a = place.split(' - ')
-		authority = a[0].strip()
-		location = a[1].strip()
+		try:
+			table.save()
+		except ValueError:
+			print("Fail! " + row[0])
 
-		table.place_name = location
-		table.region_name = authority
-	else:
-		print("Unrecognised code: %s" % code)
-
-	try:
-		table.save()
-	except ValueError:
-		print("Fail! " + row[0])
+if __name__ == '__main__':
+	load_pop_data()
