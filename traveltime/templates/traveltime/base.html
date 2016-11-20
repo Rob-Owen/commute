@@ -23,23 +23,24 @@
       
       <!-- Typeahead -->
       <script type="text/javascript" src="{% static "bootstrap-typeahead.js" %}"></script>
+
+      {% block extra_head %}{% endblock %}
       
       <!-- My Custom Styles -->
       <link rel="stylesheet" type="text/css" href="{% static "style.css" %}" />
   
-      {% block extra_head %}{% endblock %}
+      
       
   </head>
   
   <body>
-
-    {% include "traveltime/navigation.html" %}
     
-    <div class="container" id="content">
+    
     {% block content %} {% endblock %}
-    </div>
+
 
    </body>
+
 </html>
 
     

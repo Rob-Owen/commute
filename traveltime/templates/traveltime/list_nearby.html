@@ -10,8 +10,9 @@
 	<link rel="stylesheet" href="https://js.arcgis.com/3.18/esri/css/esri.css">
 	<script src="https://js.arcgis.com/3.18/"></script>
 
-	<!-- Esri Boostrap -->
-	<!-- <link rel="stylesheet" href="//esri.github.io/bootstrap-map-js/src/css/bootstrapmap.css"> -->
+	<!-- ArcGIS API for JavaScript and Bootstrap CSS-->
+	<link rel="stylesheet" href="https://js.arcgis.com/3.10/js/esri/css/esri.css">
+	<link rel="stylesheet" href="https://esri.github.io/bootstrap-map-js/src/css/bootstrapmap.css">
 
 	<!-- Add layer importing -->
 	<script src='{% static "geojson-layer-js-master/vendor/terraformer/terraformer.min.js" %}'></script>
@@ -63,7 +64,7 @@
 
 			var Attrs = {name : locations[i].name, time : locations[i].time }
 					var geometryPoint = new Point(locations[i].longitude, locations[i].latitude);
-					map.graphics.add(new Graphic(geometryPoint, picSymbol, Attrs, new InfoTemplate("${name}", "Travel Time: ${time} minutes")));
+					map.graphics.add(new Graphic(geometryPoint, picSymbol, Attrs, new InfoTemplate("Origin", "${name} </br> Travel Time: ${time} minutes")));
 				}
 
 			// Add destination marker
@@ -130,41 +131,42 @@
 
 {% block content %}
 
-<div class ="row">
-	<div class ="col-md-4" style="padding:15px;">
-		<div class="panel panel-primary panel-fixed">
-			<div class="panel-heading">
-				<h3 class="panel-title">Load Datasets from ArcGIS OpenData</h3>
-			</div>
-			<div class="panel-body collapse in">
-				<div class="form text-left">
-					<div class="form-group">
-						<label class="control-label">Demographic Data</label>
-						<select class="form-control" id="selGeoJson">
-							<option value='{% static "data/supermarkets.geojson" %}'>UK Supermarkets</option>
-							<option value='{% static "data/working.geojson" %}'>Working Status</option>
-						</select>
-					</div>
-					<div class="form-group">
-						<label class="control-label">Your Data <a target="_blank" href="https://developers.arcgis.com/javascript/jshelp/ags_proxy.html">(URL/File/CORS Server)</a></label>
-						<div class="input-group">
-							<input type="text" class="form-control" id="geoJsonUrl" value='{% static "data/supermarkets.geojson" %}' placeholder='{% static "data/supermarkets.geojson" %}'>
-							<span class="input-group-btn">
-								<button id="btnAdd" class="btn btn-success" type="button">Load</button>
-							</span>
-						</div>
-					</div>
-					<div class="form-group text-center">
-						<button id="btnRemove" class="btn btn-default btn-block">Clear All</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="container col-md-8" style="padding:15px;">
-		<div id="map"></div>
-	</div>
-</div>
+    <div class="panel panel-primary panel-fixed">
+        <div class="panel-heading">
+            <h3 class="panel-title">Load ArcGIS GeoJSON Layer</h3>
+            <button id="chevron" class="btn btn-primary btn-xs btn-absolute">
+                <span class="glyphicon glyphicon-chevron-up"></span>
+            </button>
+        </div>
+        <div class="panel-body collapse in">
+            <div class="form text-left">
+                <div class="form-group">
+                    <label class="control-label">Sample Data</label>
+                    <select class="form-control" id="selGeoJson">
+                        <option value='{% static "data/supermarkets.geojson" %}'>UK Supermarkets</option>
+                        <option value='{% static "data/working.geojson" %}'>Working Status</option>
+                        <option value='{% static "data/supermarkets.geojson" %}'>UK Supermarkets</option>
+                        <option value='{% static "data/working.geojson" %}'>Working Status</option>
+                        <option value='{% static "data/nature_reserves.geojson" %}'>Nature Reserves</option>
+                        <option value='{% static "data/life_expectancy.geojson" %}'>Life Expectancy</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Your Data <a target="_blank" href="https://developers.arcgis.com/javascript/jshelp/ags_proxy.html">(URL/File/CORS Server)</a></label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="geoJsonUrl" value='{% static "data/supermarkets.geojson" %}' placeholder='{% static "data/supermarkets.geojson" %}'>
+                      <span class="input-group-btn">
+                        <button id="btnAdd" class="btn btn-success" type="button">Load</button>
+                      </span>
+                    </div>
+                </div>
 
+                <div class="form-group text-center">
+                    <button id="btnRemove" class="btn btn-default btn-block">Clear All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="map"></div>
 
 {% endblock %}
